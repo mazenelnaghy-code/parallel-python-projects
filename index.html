@@ -308,7 +308,7 @@ select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid 
   </div>
 
   <div class="card panel" role="tabpanel" id="p-words" aria-labelledby="tab-words" hidden>
-    <div class="chips"><span class="chip">Build: ~3 h</span><span class="chip">Not tested yet</span></div>
+    <div class="chips"><span class="chip">Build: ~3 h</span><span class="chip">Tested on our laptop</span><span class="chip">6 million words</span></div>
     <h3>Word count (MapReduce)</h3>
     <label for="wc-text" class="note">Text to count (edit it if you like):</label>
     <textarea id="wc-text">Parallel computing is the simultaneous use of multiple compute resources to solve a computational problem fast. A problem is broken into discrete parts that can be solved concurrently. Each part is further broken down to a series of instructions. Instructions from each part execute simultaneously on different processors. An overall control and coordination mechanism is employed. The compute resources are a single computer with multiple processors or cores, or an arbitrary number of such computers connected by a network.</textarea>
@@ -319,8 +319,11 @@ select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid 
       <b>Map</b><span>Cut the text into 4 parts. Each process counts the words in its part.</span>
       <b>Reduce</b><span>The main program adds the 4 counts together.</span>
       <b>Lecture</b><span>Decomposition and composition (Lecture 4): divide the problem, then combine the results.</span>
-      <b>Overhead</b><span>Sending text and merging many small results costs time. Fix: few big parts.</span>
     </div>
+    <p class="note">Our real test: counting 6 million words (43 MB of text) on our laptop. All 4 versions gave exactly the same counts.</p>
+    <div class="bars" data-bars='[["Sequential",3.75,"seq"],["4 processes, send the text",1.88,"par","2.0× faster"],["4 processes, each reads its own part",1.58,"par","2.4× faster"],["5,000 tiny tasks",3.58,"bad","barely faster"]]'></div>
+    <div class="callout bad"><b class="t">Overhead version</b><span>5,000 tiny tasks: each one sends back a list of about 5,000 word counts, so the main program has to merge 5,000 big messages. <span class="mono">3.58 s</span>, almost as slow as sequential.</span></div>
+    <div class="callout good"><b class="t">Fix</b><span>Few big parts, and send each process only where its part starts and ends in the file, not the text itself. Each process reads its own part: <span class="mono">1.58 s</span>, 2.4× faster.</span></div>
   </div>
 
   <div class="card panel" role="tabpanel" id="p-dl" aria-labelledby="tab-dl" hidden>
