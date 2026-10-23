@@ -114,6 +114,19 @@ input[type=range] { width: 100%; accent-color: var(--par); }
 .say li::before { content: counter(s); font-family: var(--mono); font-weight: 600; color: var(--par); }
 a { color: var(--par); }
 .only-print { display: none; }
+.byline { font-family: var(--display); font-size: 18px; margin-top: 8px; }
+.formula { font-family: var(--mono); font-size: 15px; background: var(--chip); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; }
+.code-wrap { position: relative; min-width: 0; }
+pre.code { margin: 0; overflow-x: auto; background: var(--chip); border-radius: 10px; padding: 12px; font: 500 12.5px/1.55 var(--mono); color: var(--ink); }
+pre.code .c { color: var(--muted); }
+.copy { position: absolute; top: 8px; right: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 4px 10px; font-size: 13px; font-weight: 600; }
+details.term { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 10px 12px; }
+details.term summary { cursor: pointer; font-family: var(--display); font-weight: 700; }
+details.term p { margin-top: 6px; color: var(--ink2); }
+.terms { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.check { display: grid; gap: 8px; }
+.check label { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--par); margin-top: 3px; }
 .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; justify-self: start; }
 .seg button { border: 0; background: var(--surface); color: var(--ink); padding: 6px 12px; font-weight: 600; font-size: 14px; }
 .seg button.on { background: var(--ink); color: var(--bg); }
@@ -147,7 +160,8 @@ select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid 
   <h1>Parallel Python Projects</h1>
   <div class="lanes" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <p class="lead">Project ideas for the sequential vs parallel task, with real timings measured on our laptop.</p>
-  <p class="note mono" style="margin-top:6px">Mazen &amp; Ahmed · Intel i7-8550U (4 cores / 8 threads) · Python 3.14.6</p>
+  <p class="byline">By <b>Mazen Elnaghy</b> &amp; <b>Ahmed Tamer</b></p>
+  <p class="note mono">Tested on our laptop: Intel i7-8550U (4 cores / 8 threads) · Python 3.14.6</p>
 </header>
 
 <section aria-labelledby="race-h">
@@ -437,6 +451,110 @@ select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid 
   </div>
 </section>
 
+
+<section aria-labelledby="math-h">
+  <h2 id="math-h">Speed-up in numbers</h2>
+  <div class="card">
+    <div class="formula"><span>Speed-up = T<sub>sequential</sub> ÷ T<sub>parallel</sub> = 3.47 ÷ 1.53 = <b>2.27×</b></span><span>Efficiency = speed-up ÷ cores = 2.27 ÷ 4 = <b>57%</b></span></div>
+    <p class="muted">A perfect 4× (100%) is impossible in practice. The missing 43% is the overhead (starting processes, sending tasks, collecting results) plus the laptop slowing its clock when all 4 cores are busy.</p>
+  </div>
+</section>
+
+<section aria-labelledby="code-h">
+  <h2 id="code-h">Starter code (Mandelbrot, all 3 versions)</h2>
+  <p class="note">The same code we used for the timings above, cleaned up. Save it as <span class="mono">mandel.py</span> and run <span class="mono">python mandel.py</span>. When we ran this exact file: sequential <span class="mono">3.60 s</span>, parallel <span class="mono">1.48 s</span> (2.43× faster), overhead version <span class="mono">29.23 s</span> (20× slower, on purpose).</p>
+  <div class="code-wrap">
+    <button class="copy hide-print" id="copy-btn" type="button">Copy</button>
+<pre class="code" id="code"><span class="c"># Sequential vs parallel Mandelbrot: 3 versions + timings</span>
+import time
+from multiprocessing import Pool
+
+W, H, MAX_IT = 640, 420, 200
+
+def escape_count(cr, ci):
+    zr = zi = 0.0
+    n = 0
+    while zr * zr + zi * zi &lt;= 4.0 and n &lt; MAX_IT:
+        zr, zi = zr * zr - zi * zi + cr, 2 * zr * zi + ci
+        n += 1
+    return n
+
+def mandel_row(y):
+    <span class="c"># one task = one whole row (good parallel)</span>
+    ci = -1.2 + 2.4 * y / H
+    return [escape_count(-2.2 + 3.0 * x / W, ci) for x in range(W)]
+
+def mandel_pixel(xy):
+    <span class="c"># one task = one pixel (overhead version)</span>
+    x, y = xy
+    return escape_count(-2.2 + 3.0 * x / W, -1.2 + 2.4 * y / H)
+
+if __name__ == "__main__":   <span class="c"># needed on Windows</span>
+    t = time.perf_counter()
+    seq = [mandel_row(y) for y in range(H)]
+    t_seq = time.perf_counter() - t
+
+    t = time.perf_counter()
+    with Pool(4) as pool:
+        par = pool.map(mandel_row, range(H), chunksize=4)
+    t_par = time.perf_counter() - t
+
+    pixels = [(x, y) for y in range(H) for x in range(W)]
+    t = time.perf_counter()
+    with Pool(4) as pool:
+        tiny = pool.map(mandel_pixel, pixels, chunksize=1)
+    t_tiny = time.perf_counter() - t
+
+    assert par == seq                                   <span class="c"># same picture</span>
+    assert tiny == [n for row in seq for n in row]
+    print(f"1. Sequential: {t_seq:.2f} s")
+    print(f"2. Parallel:   {t_par:.2f} s  ({t_seq / t_par:.2f}x faster)")
+    print(f"3. Overhead:   {t_tiny:.2f} s  (268,800 tiny tasks)")</pre>
+  </div>
+</section>
+
+<section aria-labelledby="live-h">
+  <h2 id="live-h">How to prove it live in the session</h2>
+  <div class="card">
+    <ol class="say">
+      <li><span><b>Open Task Manager</b> (Ctrl + Shift + Esc) → Performance → CPU. Right-click the graph → Change graph to → Logical processors.</span></li>
+      <li><span><b>Run the sequential version:</b> only one core's graph jumps up.</span></li>
+      <li><span><b>Run the parallel version:</b> all cores jump up together. That is the parallelism, visible.</span></li>
+      <li><span><b>Show the same result:</b> the <span class="mono">assert</span> lines prove both versions produce the exact same picture.</span></li>
+      <li><span><b>Show the numbers:</b> times, speed-up and the overhead version being slower.</span></li>
+      <li><span><b>Keep the laptop plugged in</b>, and run each version 2–3 times for steady numbers.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section aria-labelledby="terms-h">
+  <h2 id="terms-h">Key words, explained simply</h2>
+  <div class="terms">
+    <details class="term"><summary>Speed-up</summary><p>How many times faster the parallel version is: sequential time ÷ parallel time.</p></details>
+    <details class="term"><summary>Overhead</summary><p>Extra time that parallel adds: starting processes, sending tasks, collecting results. Lecture 2 calls it communication overhead.</p></details>
+    <details class="term"><summary>Chunk size</summary><p>How much work goes in one task. Too small: too many messages. Too big: some cores sit idle at the end.</p></details>
+    <details class="term"><summary>Load balancing</summary><p>Giving every core a similar amount of work so none waits for the others (Lecture 4).</p></details>
+    <details class="term"><summary>Process vs thread</summary><p>A process has its own memory; threads share one. In Python, only processes run heavy calculations on several cores at once.</p></details>
+    <details class="term"><summary>GIL</summary><p>Python's lock that lets only one thread run Python code at a time. The reason threads don't speed up calculations.</p></details>
+    <details class="term"><summary>MIMD</summary><p>Multiple instructions, multiple data. Each core runs its own instructions on its own data. Multi-core PCs are MIMD (Lecture 2).</p></details>
+    <details class="term"><summary>Data parallelism</summary><p>The same operation on different pieces of data at the same time. The SIMD idea, done here in software.</p></details>
+  </div>
+</section>
+
+<section aria-labelledby="todo-h">
+  <h2 id="todo-h">Our checklist before Sunday</h2>
+  <div class="card check" id="todo">
+    <label><input type="checkbox" id="t1"><span>Pick the project (Mandelbrot recommended).</span></label>
+    <label><input type="checkbox" id="t2"><span>Write and time the sequential version.</span></label>
+    <label><input type="checkbox" id="t3"><span>Write and time the parallel version (4 processes).</span></label>
+    <label><input type="checkbox" id="t4"><span>Write the overhead version (tiny tasks) and time it.</span></label>
+    <label><input type="checkbox" id="t5"><span>Check both versions give the same result.</span></label>
+    <label><input type="checkbox" id="t6"><span>Try 1, 2, 4 and 8 processes and note the speed-up.</span></label>
+    <label><input type="checkbox" id="t7"><span>Practise the Task Manager demo.</span></label>
+    <label><input type="checkbox" id="t8"><span>Practise the 6-point explanation below.</span></label>
+  </div>
+  <p class="note hide-print">Ticks are saved on this phone only.</p>
+</section>
 
 <section aria-labelledby="say-h">
   <h2 id="say-h">How we'll explain it in the session</h2>
@@ -756,6 +874,37 @@ select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid 
   document.getElementById("life-step").addEventListener("click", lifeStep);
   document.getElementById("life-rand").addEventListener("click", function () { seed = Math.floor(Math.random() * 1e9) + 1; lifeNew(); });
   lifeNew();
+
+  // copy starter code
+  document.getElementById("copy-btn").addEventListener("click", function () {
+    var b = this, code = document.getElementById("code");
+    function done(msg) { b.textContent = msg; setTimeout(function () { b.textContent = "Copy"; }, 1600); }
+    function select() { var r = document.createRange(); r.selectNodeContents(code); var s = getSelection(); s.removeAllRanges(); s.addRange(r); done("Selected"); }
+    try { navigator.clipboard.writeText(code.innerText).then(function () { done("Copied"); }, select); } catch (e) { select(); }
+  });
+
+  // checklist saved on this device only
+  document.querySelectorAll("#todo input").forEach(function (cb) {
+    try { cb.checked = localStorage.getItem("todo-" + cb.id) === "1"; } catch (e) {}
+    cb.addEventListener("change", function () { try { localStorage.setItem("todo-" + cb.id, cb.checked ? "1" : "0"); } catch (e) {} });
+  });
+
+  // PDF: open every key word, and turn drawn pictures into solid images so phone viewers show them
+  if (PRINT) {
+    document.querySelectorAll("details").forEach(function (d) { d.open = true; });
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        mbDraw(); frame(99);
+        document.querySelectorAll("canvas").forEach(function (cv) {
+          var t = document.createElement("canvas"); t.width = cv.width; t.height = cv.height;
+          var x = t.getContext("2d"); x.fillStyle = col("--surface"); x.fillRect(0, 0, t.width, t.height); x.drawImage(cv, 0, 0);
+          var im = document.createElement("img"); im.src = t.toDataURL("image/jpeg", 0.92); im.alt = cv.getAttribute("aria-label") || "";
+          im.setAttribute("style", (cv.getAttribute("style") || "") + ";width:100%;display:block;border-radius:8px");
+          cv.replaceWith(im);
+        });
+      }, 200);
+    });
+  }
 })();
 </script>
 
