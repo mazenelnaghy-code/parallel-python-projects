@@ -83,7 +83,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--par); outli
 .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--k); }
 
 /* tabs */
-.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
 .tabs button { flex: 0 0 auto; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 13px; font-weight: 600; font-size: 14px; }
 .tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .panel { display: grid; gap: 12px; }
@@ -197,18 +197,18 @@ select { font: inherit; padding: 4px 8px; border-radius: 8px; border: 1px solid 
 </section>
 
 <section aria-labelledby="ideas-h">
-  <h2 id="ideas-h">The project ideas</h2>
-  <p class="note">Each one was really run on our laptop.<span class="hide-print"> Tap a project, then play with its demo.</span></p>
+  <h2 id="ideas-h">The 9 project ideas</h2>
+  <p class="note">Each one was really run on our laptop.<span class="hide-print"> Tap any of the 9 buttons, then play with that project's demo.</span></p>
   <div class="tabs hide-print" role="tablist" aria-label="Projects">
-    <button role="tab" id="tab-mandel" aria-controls="p-mandel" aria-selected="true">Mandelbrot ★</button>
-    <button role="tab" id="tab-filter" aria-controls="p-filter" aria-selected="false">Photo filter</button>
-    <button role="tab" id="tab-pi" aria-controls="p-pi" aria-selected="false">Monte Carlo π</button>
-    <button role="tab" id="tab-primes" aria-controls="p-primes" aria-selected="false">Primes</button>
-    <button role="tab" id="tab-matrix" aria-controls="p-matrix" aria-selected="false">Matrix</button>
-    <button role="tab" id="tab-queens" aria-controls="p-queens" aria-selected="false">N-Queens</button>
-    <button role="tab" id="tab-words" aria-controls="p-words" aria-selected="false">Word count</button>
-    <button role="tab" id="tab-dl" aria-controls="p-dl" aria-selected="false">Downloads</button>
-    <button role="tab" id="tab-life" aria-controls="p-life" aria-selected="false">Game of Life</button>
+    <button role="tab" id="tab-mandel" aria-controls="p-mandel" aria-selected="true">1. Mandelbrot ★</button>
+    <button role="tab" id="tab-filter" aria-controls="p-filter" aria-selected="false">2. Photo filter</button>
+    <button role="tab" id="tab-pi" aria-controls="p-pi" aria-selected="false">3. Monte Carlo π</button>
+    <button role="tab" id="tab-primes" aria-controls="p-primes" aria-selected="false">4. Primes</button>
+    <button role="tab" id="tab-matrix" aria-controls="p-matrix" aria-selected="false">5. Matrix</button>
+    <button role="tab" id="tab-queens" aria-controls="p-queens" aria-selected="false">6. N-Queens</button>
+    <button role="tab" id="tab-words" aria-controls="p-words" aria-selected="false">7. Word count</button>
+    <button role="tab" id="tab-dl" aria-controls="p-dl" aria-selected="false">8. Downloads</button>
+    <button role="tab" id="tab-life" aria-controls="p-life" aria-selected="false">9. Game of Life</button>
   </div>
 
   <div class="card panel" role="tabpanel" id="p-mandel" aria-labelledby="tab-mandel">
