@@ -3,6 +3,8 @@
 An interactive guide to nine project ideas for a sequential vs parallel Python task. Every idea has a
 playable demo in the browser, and the main ones come with real timings measured on a laptop.
 
+**Live demo:** [mazenelnaghy-code.github.io/parallel-python-projects/](https://mazenelnaghy-code.github.io/parallel-python-projects/)
+
 Section project for **CCE 424 Parallel Processing**, by Mazen Elnaghy and Ahmed Tamer.
 
 ## Measured results
@@ -31,7 +33,7 @@ and Conway's Game of Life.
 
 ## Run it
 
-Open `index.html` in any modern browser. It is a single file with no build step.
+Open the [live demo](https://mazenelnaghy-code.github.io/parallel-python-projects/), or open `index.html` in any modern browser. It is a single file with no build step.
 
 ## Built with
 
