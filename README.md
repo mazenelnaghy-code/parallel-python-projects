@@ -5,6 +5,8 @@ playable demo in the browser, and the main ones come with real timings measured 
 
 **Live demo:** [mazenelnaghy-code.github.io/parallel-python-projects/](https://mazenelnaghy-code.github.io/parallel-python-projects/)
 
+![The live guide: the race between one core and four, with measured times](assets/preview.png)
+
 Section project for **CCE 424 Parallel Processing**, by Mazen Elnaghy and Ahmed Tamer.
 
 ## Measured results
